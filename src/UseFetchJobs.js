@@ -8,6 +8,7 @@ const ACTIONS = {
   MAKE_REGUEST: "make_request",
   GET_DATA: "get_data",
   ERROR: "error",
+  UPDATE_HAS_NEXT_PAGE:"update_has_next_page"
 };
 
 function reducer(state, action) {
@@ -23,6 +24,8 @@ function reducer(state, action) {
         error: action.payload.error,
         jobs: [],
       };
+    case ACTIONS.UPDATE_HAS_NEXT_PAGE:
+        return {...state,hasNextPage:ACTIONS.payload.hasNextPage}  
     default:
       break;
   }
@@ -32,11 +35,11 @@ export default function useFetchJobs(params, page) {
   const [state, dispatch] = useReducer(reducer, { jobs: [], loading: true });
 
   useEffect(() => {
-    const cancelToken = axios.CancelToken.source();
+    const cancelToken1 = axios.CancelToken.source();
     dispatch({ type: ACTIONS.MAKE_REGUEST });
     axios
       .get(BASE_URL, {
-        cancelToken: cancelToken.token,
+        cancelToken: cancelToken1.token,
         params: {
           markdown: true,
           page: page,
@@ -50,8 +53,27 @@ export default function useFetchJobs(params, page) {
         if (axios.isCancel(e)) return;
         dispatch({ type: ACTIONS.ERROR, payload: { error: e } });
       });
+
+      const cancelToken2 = axios.CancelToken.source();
+      axios
+      .get(BASE_URL, {
+        cancelToken: cancelToken2.token,
+        params: {
+          markdown: true,
+          page: page+1,
+          ...params,
+        },
+      })
+      .then((res) => {
+        dispatch({ type: ACTIONS.UPDATE_HAS_NEXT_PAGE, payload: { hasNextPage: res.data.length !== 0  } });
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) return;
+        dispatch({ type: ACTIONS.ERROR, payload: { error: e } });
+      });
     return () => {
-      cancelToken.cancel();
+      cancelToken1.cancel();
+      cancelToken2.cancel();
     };
   }, [params, page]);
 
