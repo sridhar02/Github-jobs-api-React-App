@@ -6,6 +6,10 @@ import Job from "./Job.js";
 import SearchForm from "./SearchForm.js";
 import JobsPagination from "./JobsPagination.js";
 
+function Sample() {
+  return null;
+}
+
 function App() {
   const [params, setParams] = useState({});
   const [page, setPage] = useState(1);
@@ -21,8 +25,9 @@ function App() {
   }
   return (
     <Container className="my-4">
+      {/* <Sample />   */}
       <h1 className="mb-4">GitHub Jobs</h1>
-      <SearchForm params={params}  onParamChnage={handleChangeParam}/>
+      <SearchForm params={params} onParamChnage={handleChangeParam} />
       <JobsPagination page={page} setPage={setPage} hasNextPage={true} />
       {loading && <h1>Loading... </h1>}
       {error && <h1>Error. Try Refreshing.</h1>}
